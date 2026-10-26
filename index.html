@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#10110f">
+  <meta name="description" content="Discover products and compare shopping options with DealKhoj. Smart Shopping. Better Deals.">
+  <title>DealKhoj — Smart Shopping. Better Deals.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <div class="announcement">
+    <span class="announcement-dot"></span>
+    Discover smarter shopping with DealKhoj
+    <span class="announcement-tag">BETA PREVIEW</span>
+  </div>
+  <header class="header">
+    <a class="brand" href="#" aria-label="DealKhoj home">
+      <span class="brand-symbol">D<span>K</span></span>
+      <span class="brand-copy">DealKhoj<small>SMART SHOPPING</small></span>
+    </a>
+    <nav class="desktop-nav" aria-label="Main navigation">
+      <a href="#deals">Explore deals</a><a href="#categories">Categories</a><a href="#stores">Stores</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-button" id="wishlistToggle" aria-label="Show favourites" title="Favourites">♡ <span id="wishCount">0</span></button>
+      <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+    </div>
+  </header>
+  <nav class="mobile-nav" id="mobileNav" aria-label="Mobile navigation" hidden>
+    <a href="#deals">Explore deals</a><a href="#categories">Categories</a><a href="#stores">Stores</a>
+  </nav>
+  <main>
+    <section class="hero">
+      <div class="hero-glow"></div>
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="sparkle">✳</span> YOUR SMART SHOPPING COMPANION</div>
+        <h1>Good finds.<br><span>Better choices.</span></h1>
+        <p class="hero-description">Explore products from your favourite stores. Compare options, discover new finds and shop smarter with DealKhoj.</p>
+        <form class="search-bar" id="searchForm" role="search">
+          <span class="search-icon" aria-hidden="true">⌕</span>
+          <label class="sr-only" for="searchInput">Search products</label>
+          <input id="searchInput" type="search" placeholder="Search shoes, fashion, gadgets..." autocomplete="off">
+          <button type="submit">Find deals <span>↗</span></button>
+        </form>
+        <div class="hero-proof"><span><i>✓</i> Multiple stores</span><span><i>✓</i> Easy discovery</span><span><i>✓</i> Free to browse</span></div>
+      </div>
+      <div class="hero-art" aria-label="Shopping discovery illustration">
+        <div class="art-ring ring-one"></div><div class="art-ring ring-two"></div>
+        <div class="art-card art-card-back"><span class="art-mini-label">YOUR NEXT FIND</span><div class="art-mini-product">◈</div><div class="art-lines"><i></i><i></i></div></div>
+        <div class="art-card art-card-front"><div class="art-top"><span>DEALKHOJ SELECT</span><span>✳</span></div><div class="art-product">✦</div><div class="art-bottom"><span>Smart finds<br><b>Start here.</b></span><span class="art-arrow">↗</span></div></div>
+        <div class="floating-note note-one"><span>↗</span> Discover more</div><div class="floating-note note-two"><span>✳</span> Shop smarter</div>
+      </div>
+      <div class="hero-bottom"><span>LESS SCROLLING. MORE DISCOVERING.</span><span class="hero-bottom-line"></span><span>MADE FOR SMART SHOPPERS IN INDIA</span></div>
+    </section>
+    <section class="store-strip" id="stores">
+      <div class="section-kicker">YOUR FAVOURITE STORES</div>
+      <div class="store-list">
+        <button class="store-chip active" data-store="all"><span class="store-icon all-icon">✳</span> All stores</button>
+        <button class="store-chip" data-store="Amazon"><span class="store-icon amazon-icon">a</span> Amazon</button>
+        <button class="store-chip" data-store="Flipkart"><span class="store-icon flipkart-icon">f</span> Flipkart</button>
+        <button class="store-chip" data-store="Meesho"><span class="store-icon meesho-icon">m</span> Meesho</button>
+        <button class="store-chip" data-store="Myntra"><span class="store-icon myntra-icon">M</span> Myntra</button>
+      </div>
+    </section>
+    <section class="categories section-wrap" id="categories">
+      <div class="section-heading"><div><div class="section-kicker">FIND YOUR THING</div><h2>Shop by category<span class="lime-period">.</span></h2></div><p>A little something for every kind of shopper.</p></div>
+      <div class="category-grid">
+        <button class="category-card cat-fashion" data-category="Fashion"><span class="cat-number">01 / STYLE</span><span class="cat-emoji">◒</span><span class="cat-name">Fashion</span><span class="cat-sub">Looks that feel like you ↗</span></button>
+        <button class="category-card cat-electronics" data-category="Electronics"><span class="cat-number">02 / TECH</span><span class="cat-emoji">⌘</span><span class="cat-name">Electronics</span><span class="cat-sub">Everyday tech finds ↗</span></button>
+        <button class="category-card cat-footwear" data-category="Footwear"><span class="cat-number">03 / MOVE</span><span class="cat-emoji">◉</span><span class="cat-name">Footwear</span><span class="cat-sub">Step into something good ↗</span></button>
+        <button class="category-card cat-home" data-category="Home"><span class="cat-number">04 / LIVING</span><span class="cat-emoji">⌂</span><span class="cat-name">Home & living</span><span class="cat-sub">Make space feel special ↗</span></button>
+      </div>
+    </section>
+    <section class="deals-section section-wrap" id="deals">
+      <div class="section-heading deals-heading">
+        <div><div class="section-kicker">THE GOOD STUFF</div><h2 id="productsHeading">Trending finds<span class="lime-period">.</span></h2><p class="heading-description">A handpicked-style demo collection to explore the experience.</p></div>
+        <div class="sort-wrap"><label for="sortSelect">Sort by</label><select id="sortSelect"><option value="featured">Featured</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option><option value="name">Name: A to Z</option></select></div>
+      </div>
+      <div class="filter-status" id="filterStatus" hidden><span id="filterStatusText"></span><button id="clearFilters">Clear filters ×</button></div>
+      <div class="product-grid" id="productGrid" aria-live="polite"></div>
+      <div class="empty-state" id="emptyState" hidden><div class="empty-icon">⌕</div><h3>No products found</h3><p>Try another search or clear your filters.</p><button class="primary-button" id="resetSearch">Show all products</button></div>
+      <div class="load-more-wrap"><button class="outline-button" id="loadMore">Explore more finds <span>↓</span></button><p class="demo-note">Demo collection only · Prices and retailer links are illustrative.</p></div>
+    </section>
+    <section class="editorial">
+      <div class="editorial-copy"><div class="section-kicker">THE DEALKHOJ WAY</div><h2>Shopping should feel<br>like a <span>good decision.</span></h2><p>Find products worth exploring, compare available store options and decide what works for you. No pressure. Just a smarter way to browse.</p><a href="#deals" class="editorial-link">Explore the collection <span>↗</span></a></div>
+      <div class="editorial-visual"><div class="editorial-circle"></div><div class="editorial-big-mark">D<span>K</span></div><div class="editorial-caption">SMART SHOPPING<br>BETTER DEALS.</div></div>
+    </section>
+    <section class="newsletter section-wrap"><div><div class="section-kicker">A LITTLE MORE DEALKHOJ</div><h2>Good finds, <span>good vibes.</span></h2><p>Stay connected. A newsletter signup can be integrated when an email service is configured.</p></div><a class="newsletter-button" href="#footer">Discover DealKhoj <span>↗</span></a></section>
+  </main>
+  <footer class="footer" id="footer">
+    <div class="footer-main">
+      <div class="footer-brand"><a class="brand brand-footer" href="#"><span class="brand-symbol">D<span>K</span></span><span class="brand-copy">DealKhoj<small>SMART SHOPPING</small></span></a><p>Discover more. Compare smarter.<br>Find what fits your life.</p></div>
+      <div class="footer-column"><h3>Explore</h3><a href="#deals">Trending finds</a><a href="#categories">Categories</a><a href="#stores">Our stores</a></div>
+      <div class="footer-column"><h3>DealKhoj</h3><a href="#about">About us</a><a href="#contact">Contact</a><a href="#disclosure">Affiliate disclosure</a></div>
+      <div class="footer-column"><h3>Good to know</h3><a href="#privacy">Privacy policy</a><a href="#terms">Terms & conditions</a><span class="footer-small">Prices may change at retailers.</span></div>
+    </div>
+    <div class="footer-disclosure" id="disclosure"><strong>Affiliate disclosure:</strong> DealKhoj may earn a commission from qualifying purchases made through eligible affiliate links. This prototype uses demonstration products and retailer homepage links only. No affiliate tracking or commission is active here. Always verify the current price and availability on the retailer's website.</div>
+    <div class="footer-bottom"><span>© <span id="currentYear"></span> DealKhoj. All rights reserved.</span><span>SMART SHOPPING. BETTER DEALS. <span class="footer-heart">✳</span></span></div>
+  </footer>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <dialog class="product-dialog" id="productDialog" aria-labelledby="dialogTitle"><button class="dialog-close" id="dialogClose" aria-label="Close product details">×</button><div id="dialogContent"></div></dialog>
+</body>
+</html>
