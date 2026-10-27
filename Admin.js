@@ -1,4 +1,3 @@
-
 // 1. SUPABASE CONFIGURATION
 
 const SUPABASE_URL = "https://qkldccdafsrlengtavdd.supabase.co";
