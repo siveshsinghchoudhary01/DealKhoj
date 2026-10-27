@@ -1,7 +1,3 @@
-/* ==========================================
-   DEALKHOJ ADMIN PANEL
-   Supabase Authentication + Product CRUD
-========================================== */
 
 // 1. SUPABASE CONFIGURATION
 
