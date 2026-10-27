@@ -1,7 +1,7 @@
  // Supabase Client Config - Apne script.js se match karte hue credentials
 const SUPABASE_URL = "https://qkldccdafsrlengtavdd.supabase.co";
 // Neeche apni Supabase 'anon' public key daalein jo aapke script.js mein use hui hai
-const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+const SUPABASE_ANON_KEY = "sb_publishable_nX2ZB5krVFUPXdQ9iUl2GQ_ZnzGEzbJ";
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
