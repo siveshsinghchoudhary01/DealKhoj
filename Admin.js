@@ -1,9 +1,11 @@
-const SUPABASE_URL = "https://qkldccdafsrlengtavdd.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_nX2ZB5krVFUPXdQ9iUl2GQ_ZnzGEzbJ";
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// 1. SUPABASE CONFIGURATION
+const SUPABASE_URL = "https://qikdcdufevlongtawdd.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_m22XR5u9VuroupxiqI2GQ_ZUoIzxbJ";
+
+// Initialize Supabase Client safely
+const supabaseClient = window.supabase.createClient(SUPABASE_URL.trim(), SUPABASE_ANON_KEY.trim());
 
 // 2. DOM ELEMENTS
-
 const loginSection = document.getElementById("login-section");
 const dashboardSection = document.getElementById("dashboard-section");
 
@@ -11,404 +13,239 @@ const loginForm = document.getElementById("login-form");
 const loginEmail = document.getElementById("login-email");
 const loginPassword = document.getElementById("login-password");
 const loginError = document.getElementById("login-error");
+const loginBtn = document.getElementById("login-btn");
 
-const productForm = document.getElementById("product-form");
 const logoutBtn = document.getElementById("logout-btn");
+const productForm = document.getElementById("product-form");
 const productsTbody = document.getElementById("products-tbody");
+const refreshBtn = document.getElementById("refresh-btn");
 
+// Form Fields
+const productIdInput = document.getElementById("product-id");
+const titleInput = document.getElementById("product-title");
+const priceInput = document.getElementById("product-price");
+const originalPriceInput = document.getElementById("product-original-price");
+const categoryInput = document.getElementById("product-category");
+const storeInput = document.getElementById("product-store");
+const imageInput = document.getElementById("product-image");
+const linkInput = document.getElementById("product-link");
+const formTitle = document.getElementById("form-title");
+const saveBtn = document.getElementById("save-btn");
+const cancelEditBtn = document.getElementById("cancel-edit-btn");
 
-// 3. HELPER: SHOW LOGIN / DASHBOARD
+// 3. CHECK AUTH SESSION ON LOAD
+async function checkSession() {
+    try {
+        const { data: { session }, error } = await supabaseClient.auth.getSession();
+        if (error) throw error;
+
+        if (session) {
+            showDashboard();
+        } else {
+            showLogin();
+        }
+    } catch (err) {
+        console.error("Session check error:", err.message);
+        showLogin();
+    }
+}
 
 function showLogin() {
-  loginSection.classList.remove("hidden");
-  dashboardSection.classList.add("hidden");
+    loginSection.classList.remove("hidden");
+    dashboardSection.classList.add("hidden");
 }
 
 function showDashboard() {
-  loginSection.classList.add("hidden");
-  dashboardSection.classList.remove("hidden");
+    loginSection.classList.add("hidden");
+    dashboardSection.classList.remove("hidden");
+    fetchProducts();
 }
 
+// 4. LOGIN HANDLER
+if (loginForm) {
+    loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        loginError.classList.add("hidden");
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = <i class="fas fa-spinner fa-spin"></i> Signing In...;
 
-// 4. AUTHENTICATION STATE
+        const email = loginEmail.value.trim();
+        const password = loginPassword.value.trim();
 
-supabase.auth.onAuthStateChange((event, session) => {
-  if (session) {
-    showDashboard();
+        try {
+            const { data, error } = await supabaseClient.auth.signInWithPassword({
+                email: email,
+                password: password
+            });
 
-    // Auth callback ke andar database operation ko
-    // alag task mein chalate hain.
-    setTimeout(() => {
-      fetchProducts();
-    }, 0);
-  } else {
-    showLogin();
-    productsTbody.replaceChildren();
-  }
-});
+            if (error) throw error;
 
-
-// 5. ADMIN LOGIN
-
-loginForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  loginError.textContent = "";
-  loginError.classList.add("hidden");
-
-  const email = loginEmail.value.trim();
-  const password = loginPassword.value;
-
-  if (!email || !password) {
-    loginError.textContent = "Email aur password enter karein.";
-    loginError.classList.remove("hidden");
-    return;
-  }
-
-  const submitBtn = loginForm.querySelector(
-    'button[type="submit"]'
-  );
-
-  if (submitBtn) submitBtn.disabled = true;
-
-  try {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+            if (data.session) {
+                showDashboard();
+            }
+        } catch (err) {
+            console.error("Login Error:", err);
+            loginError.textContent = err.message || "Invalid email or password. Please try again.";
+            loginError.classList.remove("hidden");
+        } finally {
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = <i class="fas fa-lock"></i> Sign In;
+        }
     });
+}
 
-    if (error) throw error;
+// 5. LOGOUT HANDLER
+if (logoutBtn) {
+    logoutBtn.addEventListener("click", async () => {
+        await supabaseClient.auth.signOut();
+        showLogin();
+    });
+}
 
-    loginForm.reset();
-  } catch (error) {
-    loginError.textContent = error.message || "Login failed.";
-    loginError.classList.remove("hidden");
-  } finally {
-    if (submitBtn) submitBtn.disabled = false;
-  }
-});
-
-
-// 6. ADMIN LOGOUT
-
-logoutBtn.addEventListener("click", async () => {
-  logoutBtn.disabled = true;
-
-  try {
-    const { error } = await supabase.auth.signOut();
-
-    if (error) throw error;
-
-    showLogin();
-  } catch (error) {
-    alert("Logout error: " + error.message);
-  } finally {
-    logoutBtn.disabled = false;
-  }
-});
-
-
-// 7. ADD NEW PRODUCT
-
-productForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const submitBtn = productForm.querySelector(
-    'button[type="submit"]'
-  );
-
-  if (submitBtn) submitBtn.disabled = true;
-
-  const priceValue = document
-    .getElementById("prod-price")
-    .value.trim();
-
-  const originalPriceValue = document
-    .getElementById("prod-orig-price")
-    .value.trim();
-
-  const productData = {
-    name: document.getElementById("prod-name").value.trim(),
-
-    description: document.getElementById("prod-desc").value.trim(),
-
-    category: document.getElementById("prod-category").value.trim(),
-
-    price: Number(priceValue),
-
-    original_price: originalPriceValue
-      ? Number(originalPriceValue)
-      : null,
-
-    image_url: document.getElementById("prod-img").value.trim(),
-
-    affiliate_url: document.getElementById("prod-aff-url").value.trim(),
-
-    badge:
-      document.getElementById("prod-badge").value.trim() || null,
-
-    is_published: document.getElementById("prod-published").checked,
-  };
-
-  // Basic validation
-
-  if (
-    !productData.name ||
-    !productData.category ||
-    !productData.image_url ||
-    !productData.affiliate_url ||
-    !Number.isFinite(productData.price) ||
-    productData.price <= 0
-  ) {
-    alert("Please sabhi required fields aur valid price check karein.");
-
-    if (submitBtn) submitBtn.disabled = false;
-    return;
-  }
-
-  if (
-    productData.original_price !== null &&
-    (
-      !Number.isFinite(productData.original_price) ||
-      productData.original_price <= 0
-    )
-  ) {
-    alert("Original price valid enter karein.");
-
-    if (submitBtn) submitBtn.disabled = false;
-    return;
-  }
-
-  // Allow only HTTP/HTTPS URLs
-
-  try {
-    const imageURL = new URL(productData.image_url);
-    const affiliateURL = new URL(productData.affiliate_url);
-
-    if (!["http:", "https:"].includes(imageURL.protocol)) {
-      throw new Error("Invalid image URL");
-    }
-
-    if (!["http:", "https:"].includes(affiliateURL.protocol)) {
-      throw new Error("Invalid affiliate URL");
-    }
-  } catch {
-    alert("Image URL aur affiliate link valid HTTP/HTTPS URLs hone chahiye.");
-
-    if (submitBtn) submitBtn.disabled = false;
-    return;
-  }
-
-  try {
-    const { error } = await supabase
-      .from("products")
-      .insert([productData]);
-
-    if (error) throw error;
-
-    alert("Product successfully added!");
-
-    productForm.reset();
-
-    await fetchProducts();
-  } catch (error) {
-    console.error("Add product error:", error);
-
-    alert("Product add nahi hua: " + error.message);
-  } finally {
-    if (submitBtn) submitBtn.disabled = false;
-  }
-});
-
-
-// 8. FETCH AND DISPLAY PRODUCTS
-
+// 6. FETCH ALL PRODUCTS
 async function fetchProducts() {
-  productsTbody.replaceChildren();
+    productsTbody.innerHTML = <tr><td colspan="4" class="text-center py-6 text-gray-500">Loading deals...</td></tr>;
 
-  const loadingRow = document.createElement("tr");
-  const loadingCell = document.createElement("td");
+    try {
+        const { data: products, error } = await supabaseClient
+            .from("products")
+            .select("*")
+            .order("created_at", { ascending: false });
 
-  loadingCell.colSpan = 5;
-  loadingCell.textContent = "Loading products...";
-  loadingCell.className = "py-4 text-center";
+        if (error) throw error;if (!products || products.length === 0) {
+            productsTbody.innerHTML = <tr><td colspan="4" class="text-center py-6 text-gray-500">No deals found. Add your first deal!</td></tr>;
+            return;
+        }
 
-  loadingRow.appendChild(loadingCell);
-  productsTbody.appendChild(loadingRow);
-
-  try {
-    const { data, error } = await supabase
-      .from("products")
-      .select(
-        "id, name, price, image_url, is_published, created_at"
-      )
-      .order("created_at", { ascending: false });
-
-    if (error) throw error;
-
-    productsTbody.replaceChildren();
-
-    if (!data || data.length === 0) {
-      const row = document.createElement("tr");
-      const cell = document.createElement("td");
-
-      cell.colSpan = 5;
-      cell.textContent = "Abhi koi product nahi hai.";
-      cell.className = "py-4 text-center text-gray-500";
-
-      row.appendChild(cell);
-      productsTbody.appendChild(row);
-
-      return;
+        productsTbody.innerHTML = "";
+        products.forEach((product) => {
+            const tr = document.createElement("tr");
+            tr.className = "hover:bg-gray-50 transition";
+            tr.innerHTML = 
+                <td class="py-3 px-4 flex items-center gap-3">
+                    <img src="${product.image || 'https://via.placeholder.com/40'}" alt="img" class="w-10 h-10 object-cover rounded border">
+                    <div>
+                        <div class="font-medium text-gray-800 line-clamp-1">${product.title || 'Untitled'}</div>
+                        <div class="text-xs text-gray-400">${product.store || ''}</div>
+                    </div>
+                </td>
+                <td class="py-3 px-4">
+                    <span class="font-bold text-emerald-600">₹${product.price || 0}</span>
+                    ${product.original_price ? <span class="text-xs text-gray-400 line-through ml-1">₹${product.original_price}</span> : ''}
+                </td>
+                <td class="py-3 px-4">
+                    <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">${product.category || 'General'}</span>
+                </td>
+                <td class="py-3 px-4 text-right space-x-2">
+                    <button onclick='editProduct(${JSON.stringify(product).replace(/'/g, "&apos;")})' class="text-blue-600 hover:text-blue-800 text-xs font-semibold">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button onclick="deleteProduct('${product.id}')" class="text-red-600 hover:text-red-800 text-xs font-semibold">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </td>
+            ;
+            productsTbody.appendChild(tr);
+        });
+    } catch (err) {
+        console.error("Error fetching products:", err);
+        productsTbody.innerHTML = <tr><td colspan="4" class="text-center py-6 text-red-500">Error loading deals: ${err.message}</td></tr>;
     }
+}
 
-    data.forEach((item) => {
-      const tr = document.createElement("tr");
+// 7. ADD OR UPDATE PRODUCT
+if (productForm) {
+    productForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        saveBtn.disabled = true;
+        saveBtn.textContent = "Saving...";
 
-      tr.className = "border-b hover:bg-gray-50";
+        const id = productIdInput.value;
+        const productData = {
+            title: titleInput.value.trim(),
+            price: parseFloat(priceInput.value) || 0,
+            original_price: originalPriceInput.value ? parseFloat(originalPriceInput.value) : null,
+            category: categoryInput.value.trim() || "General",
+            store: storeInput.value.trim() || "Online",
+            image: imageInput.value.trim(),
+            link: linkInput.value.trim()
+        };
 
-      // Product image
+        try {
+            if (id) {
+                // Update existing product
+                const { error } = await supabaseClient
+                    .from("products")
+                    .update(productData)
+                    .eq("id", id);
+                if (error) throw error;
+            } else {
+                // Insert new product
+                const { error } = await supabaseClient
+                    .from("products")
+                    .insert([productData]);
+                if (error) throw error;
+            }
 
-      const imageCell = document.createElement("td");
-      imageCell.className = "py-3 px-2";
-
-      const img = document.createElement("img");
-
-      img.src = item.image_url || "";
-      img.alt = item.name || "Product";
-      img.loading = "lazy";
-      img.className = "w-12 h-12 object-cover rounded";
-
-      img.addEventListener("error", () => {
-        img.style.display = "none";
-      });
-
-      imageCell.appendChild(img);
-
-      // Product name
-
-      const nameCell = document.createElement("td");
-
-      nameCell.className =
-        "py-3 px-2 font-medium text-gray-900";
-
-      nameCell.textContent = item.name || "Unnamed product";
-
-      // Product price
-
-      const priceCell = document.createElement("td");
-
-      priceCell.className = "py-3 px-2";
-
-      const price = Number(item.price);
-
-      priceCell.textContent = Number.isFinite(price)
-        ? "₹" + price.toLocaleString("en-IN")
-        : "Price unavailable";
-
-      // Published / Draft status
-
-      const statusCell = document.createElement("td");
-      statusCell.className = "py-3 px-2";
-
-      const statusBadge = document.createElement("span");
-
-      statusBadge.className = item.is_published
-        ? "text-green-600 bg-green-50 px-2 py-1 rounded text-xs font-semibold"
-        : "text-yellow-600 bg-yellow-50 px-2 py-1 rounded text-xs font-semibold";
-
-      statusBadge.textContent = item.is_published
-        ? "Live"
-        : "Draft";
-
-      statusCell.appendChild(statusBadge);
-
-      // Delete button
-
-      const actionCell = document.createElement("td");
-
-      actionCell.className = "py-3 px-2 text-right";
-
-      const deleteBtn = document.createElement("button");
-
-      deleteBtn.type = "button";
-      deleteBtn.textContent = "Delete";
-
-      deleteBtn.className =
-        "bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1 rounded text-xs font-medium";
-
-      deleteBtn.addEventListener("click", () => {
-        deleteProduct(item.id, deleteBtn);
-      });
-
-      actionCell.appendChild(deleteBtn);
-
-      // Add all cells to row
-
-      tr.append(
-        imageCell,
-        nameCell,
-        priceCell,
-        statusCell,
-        actionCell
-      );
-
-      productsTbody.appendChild(tr);
+            resetForm();
+            fetchProducts();
+        } catch (err) {
+            console.error("Save error:", err);
+            alert("Failed to save deal: " + err.message);
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.textContent = "Save Product";
+        }
     });
-  } catch (error) {
-    console.error("Fetch products error:", error);
+}// 8. EDIT & DELETE HELPERS
+window.editProduct = function (product) {
+    productIdInput.value = product.id;
+    titleInput.value = product.title || "";
+    priceInput.value = product.price || "";
+    originalPriceInput.value = product.original_price || "";
+    categoryInput.value = product.category || "";
+    storeInput.value = product.store || "";
+    imageInput.value = product.image || "";
+    linkInput.value = product.link || "";
 
-    productsTbody.replaceChildren();
+    formTitle.textContent = "Edit Deal";
+    saveBtn.textContent = "Update Product";
+    cancelEditBtn.classList.remove("hidden");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+};
 
-    const row = document.createElement("tr");
-    const cell = document.createElement("td");
+window.deleteProduct = async function (id) {
+    if (!confirm("Are you sure you want to delete this deal?")) return;
 
-    cell.colSpan = 5;
-    cell.textContent =
-      "Products load nahi hue: " + error.message;
+    try {
+        const { error } = await supabaseClient
+            .from("products")
+            .delete()
+            .eq("id", id);
 
-    cell.className = "py-4 text-center text-red-600";
+        if (error) throw error;
+        fetchProducts();
+    } catch (err) {
+        console.error("Delete error:", err);
+        alert("Failed to delete: " + err.message);
+    }
+};
 
-    row.appendChild(cell);
-    productsTbody.appendChild(row);
-  }
+function resetForm() {
+    productForm.reset();
+    productIdInput.value = "";
+    formTitle.textContent = "Add New Deal";
+    saveBtn.textContent = "Save Product";
+    cancelEditBtn.classList.add("hidden");
 }
 
-
-// 9. DELETE PRODUCT
-
-async function deleteProduct(id, button) {
-  const confirmed = confirm(
-    "Kya aap sach mein is product ko delete karna chahte hain?"
-  );
-
-  if (!confirmed) return;
-
-  button.disabled = true;
-  button.textContent = "Deleting...";
-
-  try {
-    const { error } = await supabase
-      .from("products")
-      .delete()
-      .eq("id", id);
-
-    if (error) throw error;
-
-    alert("Product successfully deleted!");
-
-    await fetchProducts();
-  } catch (error) {
-    console.error("Delete product error:", error);
-
-    alert("Delete error: " + error.message);
-
-    button.disabled = false;
-    button.textContent = "Delete";
-  }
+if (cancelEditBtn) {
+    cancelEditBtn.addEventListener("click", resetForm);
 }
 
+if (refreshBtn) {
+    refreshBtn.addEventListener("click", fetchProducts);
+}
 
-// 10. MAKE FUNCTION AVAILABLE IF NEEDED
-
-window.deleteProduct = deleteProduct;
+// Initialize on page load
+document.addEventListener("DOMContentLoaded", checkSession);
