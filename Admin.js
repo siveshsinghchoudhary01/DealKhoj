@@ -67,8 +67,7 @@ if (loginForm) {
         e.preventDefault();
         loginError.classList.add("hidden");
         loginBtn.disabled = true;
-        loginBtn.innerHTML = <i class="fas fa-spinner fa-spin"></i> Signing In...;
-
+        loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
         const email = loginEmail.value.trim();
         const password = loginPassword.value.trim();
 
