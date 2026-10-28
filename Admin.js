@@ -88,7 +88,7 @@ if (loginForm) {
             loginError.classList.remove("hidden");
         } finally {
             loginBtn.disabled = false;
-           loginBtn.innerHTML = '<i class="fas fa-lock"></i> Sign In';
+           loginBtn.innerHTML = '<i class="fas fa-lock"></i> Sign In';.
         }
     });
 }
